@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>راهنمای Renderer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    :root {
+      --bg: #0e1014;
+      --bar: #161920;
+      --menu: #1a1e26;
+      --border: #2a303a;
+      --text: #e4e7ee;
+      --muted: #8b93a1;
+      --accent: #4b92f0;
+      --hover: rgba(255, 255, 255, .06);
+      --danger: #ff6b6b;
+      --ok: #3dd68c;
+      --font: Lalezar, Tahoma, "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.65 var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    #top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 48px;
+      padding: 8px 16px;
+      background: var(--bar);
+      border-bottom: 1px solid #0a0c10;
+    }
+    #top .brand {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    #top .brand i { color: var(--accent); margin-left: 6px; }
+    html[dir="ltr"] #top .brand i { margin-left: 0; margin-right: 6px; }
+    #top nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-width: 0;
+    }
+    #top nav a {
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+    }
+    #top nav a:hover { background: var(--hover); color: var(--text); text-decoration: none; }
+    #top .actions { margin-right: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+    html[dir="ltr"] #top .actions { margin-right: 0; margin-left: auto; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .pill:hover { background: var(--hover); text-decoration: none; color: var(--text); }
+    .pill.primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: #fff;
+    }
+    .pill.primary:hover { filter: brightness(1.08); color: #fff; }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+    .hero {
+      padding: 28px 24px;
+      margin-bottom: 28px;
+      background: var(--menu);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 52ch;
+    }
+    .hero .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 36px 0 12px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    h2 i { color: var(--accent); font-size: 1.1em; }
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 16px;
+      color: #d5dbe6;
+    }
+    p { margin: 0 0 12px; color: #b8c0ce; }
+    ul, ol { margin: 0 0 14px; padding-right: 1.25em; padding-left: 0; color: #b8c0ce; }
+    html[dir="ltr"] ul, html[dir="ltr"] ol { padding-left: 1.25em; padding-right: 0; }
+    li { margin: 6px 0; }
+    kbd {
+      display: inline-block;
+      padding: 1px 7px;
+      border: 1px solid #3a4150;
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      background: #222831;
+      font: 12px var(--font);
+      color: var(--text);
+    }
+    .card {
+      background: var(--menu);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 12px 0 18px;
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin: 12px 0 18px;
+    }
+    .tile {
+      background: var(--menu);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .tile .icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(75, 146, 240, .12);
+      color: var(--accent);
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .tile h3 { margin: 0 0 6px; font-size: 15px; }
+    .tile p { margin: 0; font-size: 13px; color: var(--muted); }
+    .tip {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(75, 146, 240, .08);
+      border: 1px solid rgba(75, 146, 240, .22);
+      color: #c5d8f5;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    .tip i { color: var(--accent); margin-top: 2px; flex: 0 0 auto; }
+    .warn {
+      background: rgba(255, 107, 107, .07);
+      border-color: rgba(255, 107, 107, .28);
+      color: #f0c4c4;
+    }
+    .warn i { color: var(--danger); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 18px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: right;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    html[dir="ltr"] th, html[dir="ltr"] td { text-align: left; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: .04em; }
+    td { color: #d0d6e0; }
+    footer {
+      margin-top: 48px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      justify-content: space-between;
+    }
+    [data-i18n-en] { display: none; }
+    html[lang="en"] [data-i18n-fa] { display: none; }
+    html[lang="en"] [data-i18n-en] { display: revert; }
+    @media (max-width: 640px) {
+      #top { flex-wrap: wrap; }
+      #top .actions { width: 100%; margin: 0; }
+      .hero h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header id="top">
+    <div class="brand"><i class="bi bi-box"></i><span data-i18n-fa>راهنمای Renderer</span><span data-i18n-en>Renderer Docs</span></div>
+    <nav>
+      <a href="#open"><span data-i18n-fa>باز کردن</span><span data-i18n-en>Open</span></a>
+      <a href="#view"><span data-i18n-fa>نمایش</span><span data-i18n-en>View</span></a>
+      <a href="#light"><span data-i18n-fa>نور</span><span data-i18n-en>Light</span></a>
+      <a href="#quality"><span data-i18n-fa>کیفیت</span><span data-i18n-en>Quality</span></a>
+      <a href="#export"><span data-i18n-fa>خروجی</span><span data-i18n-en>Export</span></a>
+      <a href="#keys"><span data-i18n-fa>کلیدها</span><span data-i18n-en>Keys</span></a>
+    </nav>
+    <div class="actions">
+      <button type="button" class="pill" id="langBtn" title="Language">
+        <i class="bi bi-translate"></i>
+        <span data-i18n-fa>English</span>
+        <span data-i18n-en>فارسی</span>
+      </button>
+      <a class="pill primary" href="https://rendererproject.github.io/" target="_blank" rel="noopener">
+        <i class="bi bi-play-fill"></i>
+        <span data-i18n-fa>باز کردن برنامه</span>
+        <span data-i18n-en>Open app</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1 data-i18n-fa>چطور از Renderer استفاده کنیم</h1>
+      <h1 data-i18n-en>How to use Renderer</h1>
+      <p data-i18n-fa>
+        مدل سه‌بعدی را در مرورگر باز کنید، نور را جابه‌جا کنید، کیفیت را عوض کنید،
+        کولیدرها را مخفی کنید و تصویر یا فرمت‌های دیگر بگیرید. روی موبایل و رایانه کار می‌کند.
+      </p>
+      <p data-i18n-en>
+        Open 3D models in the browser, move the light, change quality, hide colliders,
+        and export images or other formats. Works on phone and PC.
+      </p>
+      <div class="row">
+        <a class="pill primary" href="https://rendererproject.github.io/" target="_blank" rel="noopener">
+          <i class="bi bi-box-arrow-up-right"></i>
+          <span data-i18n-fa>اجرای Renderer</span>
+          <span data-i18n-en>Launch Renderer</span>
+        </a>
+        <a class="pill" href="#open"><i class="bi bi-folder2-open"></i>
+          <span data-i18n-fa>از اینجا شروع کنید</span>
+          <span data-i18n-en>Start here</span>
+        </a>
+      </div>
+    </section>
+
+    <h2 id="open"><i class="bi bi-folder2-open"></i>
+      <span data-i18n-fa>باز کردن مدل</span>
+      <span data-i18n-en>Open a model</span>
+    </h2>
+    <div class="grid">
+      <div class="tile">
+        <div class="icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+        <h3 data-i18n-fa>منوی فایل</h3>
+        <h3 data-i18n-en>File menu</h3>
+        <p data-i18n-fa>از <strong>فایل ← باز کردن…</strong> (یا <kbd>Ctrl</kbd>+<kbd>O</kbd>) مدل را از دستگاه خود انتخاب کنید.</p>
+        <p data-i18n-en>Choose <strong>File → Open…</strong> (or <kbd>Ctrl</kbd>+<kbd>O</kbd>) and pick a model from your device.</p>
+      </div>
+      <div class="tile">
+        <div class="icon"><i class="bi bi-hand-index"></i></div>
+        <h3 data-i18n-fa>کشیدن و رها کردن</h3>
+        <h3 data-i18n-en>Drag and drop</h3>
+        <p data-i18n-fa>فایل (یا پوشه / زیپ) را روی ناحیه تیرهٔ نما بیندازید.</p>
+        <p data-i18n-en>Drop a file (or a folder/zip) onto the dark viewport area.</p>
+      </div>
+      <div class="tile">
+        <div class="icon"><i class="bi bi-stars"></i></div>
+        <h3 data-i18n-fa>مدل نمونه</h3>
+        <h3 data-i18n-en>Sample model</h3>
+        <p data-i18n-fa>از <strong>فایل ← باز کردن مدل نمونه</strong> یا دکمهٔ صفحهٔ خالی استفاده کنید.</p>
+        <p data-i18n-en>Use <strong>File → Open sample model</strong> or the button on the empty screen.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3><i class="bi bi-file-earmark-code"></i>
+        <span data-i18n-fa>فرمت‌های رایج</span>
+        <span data-i18n-en>Common formats</span>
+      </h3>
+      <p data-i18n-fa>
+        glTF / GLB، OBJ (+ MTL)، FBX، COLLADA (DAE)، STL، PLY، 3DS، 3MF و
+        RenderWare <strong>DFF / TXD</strong> (سبک GTA). بافت‌های کنار مدل با باز کردن زیپ یا چند فایل با هم بارگذاری می‌شوند.
+      </p>
+      <p data-i18n-en>
+        glTF / GLB, OBJ (+ MTL), FBX, COLLADA (DAE), STL, PLY, 3DS, 3MF, and
+        RenderWare <strong>DFF / TXD</strong> (GTA-style). Textures next to the model load when you open a zip or drop several files together.
+      </p>
+    </div>
+    <div class="tip">
+      <i class="bi bi-info-circle"></i>
+      <span data-i18n-fa>ماشین‌های خیلی بزرگ روی موبایل ممکن است کند باشند. <strong>کیفیت Path ← کم</strong> یا <strong>خاموش</strong> را انتخاب کنید.</span>
+      <span data-i18n-en>Large cars can be slow on phones. Prefer <strong>Path quality → Low</strong> or <strong>Off</strong>.</span>
+    </div>
+
+    <h2 id="view"><i class="bi bi-eye"></i>
+      <span data-i18n-fa>چرخاندن و نگاه کردن</span>
+      <span data-i18n-en>Look around</span>
+    </h2>
+    <ul data-i18n-fa>
+      <li><strong>چرخش دوربین</strong> — کشیدن با دکمهٔ چپ روی فضای خالی.</li>
+      <li><strong>جابه‌جایی</strong> — دکمهٔ راست (یا دو انگشت روی لمسی).</li>
+      <li><strong>زوم</strong> — چرخ ماوس یا نیشگون.</li>
+      <li><strong>چرخش خود مدل</strong> — <strong>نمایش ← چرخش مدل</strong> (یا <kbd>M</kbd>)، سپس مدل را بکشید.</li>
+      <li><strong>چرخش دقیق</strong> — <strong>نمایش ← چرخش به‌اندازه…</strong> برای ۹۰° / ۱۸۰° یا بازنشانی.</li>
+      <li><strong>چرخش خودکار</strong> — <strong>نمایش ← چرخش خودکار</strong> (<kbd>A</kbd>).</li>
+      <li><strong>سیم‌نما</strong> — <strong>نمایش ← سیم‌نما</strong> (<kbd>W</kbd>).</li>
+    </ul>
+    <ul data-i18n-en>
+      <li><strong>Rotate camera</strong> — left-drag on empty space.</li>
+      <li><strong>Pan</strong> — right-drag (or two-finger drag on touch).</li>
+      <li><strong>Zoom</strong> — scroll wheel or pinch.</li>
+      <li><strong>Rotate the model</strong> — <strong>View → Rotate model</strong> (or <kbd>M</kbd>), then drag.</li>
+      <li><strong>Snap rotate</strong> — <strong>View → Rotate by…</strong> for 90° / 180° or reset.</li>
+      <li><strong>Auto-rotate</strong> — <strong>View → Auto-rotate</strong> (<kbd>A</kbd>).</li>
+      <li><strong>Wireframe</strong> — <strong>View → Wireframe</strong> (<kbd>W</kbd>).</li>
+    </ul>
+
+    <h2 id="light"><i class="bi bi-lightbulb"></i>
+      <span data-i18n-fa>نور</span>
+      <span data-i18n-en>Light</span>
+    </h2>
+    <p data-i18n-fa>نور اصلی یک لامپ قابل‌جابه‌جایی است:</p>
+    <p data-i18n-en>The key light is a movable bulb:</p>
+    <ul data-i18n-fa>
+      <li><strong>نمایش ← تنظیمات نور…</strong> (<kbd>L</kbd>) — اسلایدرهای X / Y / Z و قدرت، و «نمایش لامپ».</li>
+      <li><strong>نمایش ← جابه‌جایی نور</strong> — پیش‌تنظیم‌های سریع (جلو، عقب، بالا، چپ، راست، پیش‌فرض).</li>
+      <li><strong>کشیدن لامپ</strong> در نما وقتی لامپ دیده می‌شود (<strong>نمایش لامپ</strong>، <kbd>B</kbd>).</li>
+    </ul>
+    <ul data-i18n-en>
+      <li><strong>View → Light settings…</strong> (<kbd>L</kbd>) — X / Y / Z and strength sliders, plus “Show bulb”.</li>
+      <li><strong>View → Move light</strong> — presets (front, back, top, left, right, default).</li>
+      <li><strong>Drag the bulb</strong> when it is visible (<strong>Show bulb</strong>, <kbd>B</kbd>).</li>
+    </ul>
+    <div class="tip">
+      <i class="bi bi-brightness-high"></i>
+      <span data-i18n-fa>در سطوح کیفیت بالاتر، سایه از لامپ پیروی می‌کند — با جابه‌جایی لامپ جهت سایه عوض می‌شود.</span>
+      <span data-i18n-en>At higher levels, shadows follow the light — move the bulb to change shadow direction.</span>
+    </div>
+
+    <h2 id="quality"><i class="bi bi-sliders"></i>
+      <span data-i18n-fa>کیفیت و ظاهر</span>
+      <span data-i18n-en>Quality &amp; look</span>
+    </h2>
+    <div class="card">
+      <h3><i class="bi bi-layers"></i>
+        <span data-i18n-fa>کیفیت رندر</span>
+        <span data-i18n-en>Render quality</span>
+      </h3>
+      <p data-i18n-fa><strong>نمایش ← کیفیت رندر</strong></p>
+      <p data-i18n-en><strong>View → Render quality</strong></p>
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n-fa>سطح</th><th data-i18n-fa>مناسب برای</th>
+            <th data-i18n-en>Level</th><th data-i18n-en>Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n-fa>سطح ۱ — استاندارد</td><td data-i18n-fa>پیش‌نمایش سریع، مدل‌های بزرگ، موبایل</td>
+            <td data-i18n-en>Level 1 — Standard</td><td data-i18n-en>Fast preview, big models, phones</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>سطح ۲ — پیشرفته</td><td data-i18n-fa>ظاهر نرم‌تر + سایه (با کیفیت Path)</td>
+            <td data-i18n-en>Level 2 — Enhanced</td><td data-i18n-en>Softer look + shadows (with path quality)</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>سطح ۳ — سینمایی</td><td data-i18n-fa>نور کلیدی + سایه دنبال لامپ</td>
+            <td data-i18n-en>Level 3 — Cinematic</td><td data-i18n-en>Key light + shadows that follow the bulb</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>سطح ۴ — فوق‌العاده</td><td data-i18n-fa>نور و متریال قوی‌تر (سنگین‌تر)</td>
+            <td data-i18n-en>Level 4 — Ultra</td><td data-i18n-en>Stronger light and materials (heavier)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3><i class="bi bi-speedometer2"></i>
+        <span data-i18n-fa>کیفیت Path</span>
+        <span data-i18n-en>Path quality</span>
+      </h3>
+      <p data-i18n-fa><strong>نمایش ← کیفیت Path</strong> هزینهٔ سایه و وضوح را تنظیم می‌کند.</p>
+      <p data-i18n-en><strong>View → Path quality</strong> controls shadow cost and resolution.</p>
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n-fa>تنظیم</th><th data-i18n-fa>نتیجه</th>
+            <th data-i18n-en>Setting</th><th data-i18n-en>What you get</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n-fa>خاموش (سریع‌ترین)</td><td data-i18n-fa>بدون سایه — روان‌ترین</td>
+            <td data-i18n-en>Off (fastest)</td><td data-i18n-en>No shadows — smoothest FPS</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>کم</td><td data-i18n-fa>سایه سبک — پیش‌فرض موبایل</td>
+            <td data-i18n-en>Low</td><td data-i18n-en>Light shadows — phone default</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>متوسط</td><td data-i18n-fa>متعادل — پیش‌فرض رایانه</td>
+            <td data-i18n-en>Medium</td><td data-i18n-en>Balanced — PC default</td>
+          </tr>
+          <tr>
+            <td data-i18n-fa>زیاد</td><td data-i18n-fa>سایه تیزتر — هزینهٔ بیشتر</td>
+            <td data-i18n-en>High</td><td data-i18n-en>Sharper shadows — more GPU cost</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul data-i18n-fa>
+      <li><strong>درخشش</strong> (<kbd>E</kbd>) — بازتاب محیط روی متریال‌ها.</li>
+      <li><strong>متریال شیشه</strong> (<kbd>G</kbd>) — ظاهر شیشه برای قطعاتی مثل شیشه / پنجره.</li>
+    </ul>
+    <ul data-i18n-en>
+      <li><strong>Shine</strong> (<kbd>E</kbd>) — environment reflections on materials.</li>
+      <li><strong>Glass materials</strong> (<kbd>G</kbd>) — glass look on parts like glass / window.</li>
+    </ul>
+    <div class="tip warn">
+      <i class="bi bi-exclamation-triangle"></i>
+      <span data-i18n-fa>اگر کند است، کیفیت Path را روی <strong>کم</strong> یا <strong>خاموش</strong> بگذارید و سطح ۱ یا ۲ را انتخاب کنید.</span>
+      <span data-i18n-en>If it lags, set Path quality to <strong>Low</strong> or <strong>Off</strong>, and use Level 1 or 2.</span>
+    </div>
+
+    <h2 id="scene"><i class="bi bi-diagram-3"></i>
+      <span data-i18n-fa>اشیای صحنه و کولیدر</span>
+      <span data-i18n-en>Scene objects &amp; colliders</span>
+    </h2>
+    <p data-i18n-fa>
+      بعد از بارگذاری مدل، از <strong>نمایش ← اشیای صحنه</strong> (یا دکمهٔ پیام پایین صفحه)
+      لیست مش‌ها، نورها، نقاط و کولیدرها را ببینید.
+    </p>
+    <p data-i18n-en>
+      After a model loads, use <strong>View → Scene objects</strong> (or the toast action)
+      to list meshes, lights, points, and colliders.
+    </p>
+    <ul data-i18n-fa>
+      <li>قطعاتی که در نامشان <strong>«coll»</strong> دارند به‌عنوان کولیدر <strong>مخفی</strong> شروع می‌شوند (در خروجی فایل می‌مانند).</li>
+      <li>با چک‌باکس هر مورد را روشن یا خاموش کنید.</li>
+    </ul>
+    <ul data-i18n-en>
+      <li>Parts with <strong>“coll”</strong> in the name start <strong>hidden</strong> as colliders (still in export).</li>
+      <li>Use the checkboxes to show or hide each item.</li>
+    </ul>
+
+    <h2 id="export"><i class="bi bi-download"></i>
+      <span data-i18n-fa>ذخیره و تبدیل</span>
+      <span data-i18n-en>Save &amp; convert</span>
+    </h2>
+    <ul data-i18n-fa>
+      <li><strong>فایل ← ذخیره تصویر (PNG)</strong> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) — تصویر نمای فعلی.</li>
+      <li>منوی <strong>تبدیل</strong> — خروجی به فرمت‌های دیگر در صورت موجود بودن.</li>
+      <li><strong>خروجی همهٔ فرمت‌ها (ZIP)</strong> — چند خروجی در یک زیپ.</li>
+      <li><strong>فایل ← بستن مدل</strong> — پاک کردن نما.</li>
+    </ul>
+    <ul data-i18n-en>
+      <li><strong>File → Save image (PNG)</strong> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) — screenshot of the view.</li>
+      <li><strong>Convert</strong> menu — export to other formats when available.</li>
+      <li><strong>Export all formats (ZIP)</strong> — several outputs in one zip.</li>
+      <li><strong>File → Close model</strong> — clear the viewport.</li>
+    </ul>
+
+    <h2 id="lang"><i class="bi bi-translate"></i>
+      <span data-i18n-fa>زبان برنامه</span>
+      <span data-i18n-en>App language</span>
+    </h2>
+    <p data-i18n-fa>
+      در خود Renderer از منوی <strong>زبان</strong> بین فارسی و انگلیسی جابه‌جا شوید.
+      پیام‌های پایین صفحه هم با همان زبان هماهنگ می‌شوند.
+    </p>
+    <p data-i18n-en>
+      In the app, switch Persian / English from the <strong>Language</strong> menu.
+      Status messages follow the same language.
+    </p>
+
+    <h2 id="keys"><i class="bi bi-keyboard"></i>
+      <span data-i18n-fa>میانبرهای صفحه‌کلید</span>
+      <span data-i18n-en>Keyboard shortcuts</span>
+    </h2>
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n-fa>کلید</th><th data-i18n-fa>عمل</th>
+          <th data-i18n-en>Key</th><th data-i18n-en>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><kbd>Ctrl</kbd>+<kbd>O</kbd></td>
+          <td data-i18n-fa>باز کردن مدل</td>
+          <td data-i18n-en>Open model</td>
+        </tr>
+        <tr>
+          <td><kbd>Ctrl</kbd>+<kbd>S</kbd></td>
+          <td data-i18n-fa>ذخیره PNG</td>
+          <td data-i18n-en>Save PNG</td>
+        </tr>
+        <tr>
+          <td><kbd>L</kbd></td>
+          <td data-i18n-fa>تنظیمات نور</td>
+          <td data-i18n-en>Light settings</td>
+        </tr>
+        <tr>
+          <td><kbd>B</kbd></td>
+          <td data-i18n-fa>نمایش / مخفی لامپ</td>
+          <td data-i18n-en>Show / hide bulb</td>
+        </tr>
+        <tr>
+          <td><kbd>E</kbd></td>
+          <td data-i18n-fa>درخشش</td>
+          <td data-i18n-en>Shine on / off</td>
+        </tr>
+        <tr>
+          <td><kbd>G</kbd></td>
+          <td data-i18n-fa>متریال شیشه</td>
+          <td data-i18n-en>Glass materials</td>
+        </tr>
+        <tr>
+          <td><kbd>W</kbd></td>
+          <td data-i18n-fa>سیم‌نما</td>
+          <td data-i18n-en>Wireframe</td>
+        </tr>
+        <tr>
+          <td><kbd>A</kbd></td>
+          <td data-i18n-fa>چرخش خودکار</td>
+          <td data-i18n-en>Auto-rotate</td>
+        </tr>
+        <tr>
+          <td><kbd>M</kbd></td>
+          <td data-i18n-fa>حالت چرخش مدل</td>
+          <td data-i18n-en>Rotate model mode</td>
+        </tr>
+      </tbody>
+    </table>
+    <p data-i18n-fa>لیست کامل: داخل برنامه <strong>راهنما ← میانبرهای صفحه‌کلید</strong>.</p>
+    <p data-i18n-en>Full list: in the app <strong>Help → Keyboard shortcuts</strong>.</p>
+
+    <h2 id="tips"><i class="bi bi-stars"></i>
+      <span data-i18n-fa>نکته‌ها</span>
+      <span data-i18n-en>Tips</span>
+    </h2>
+    <div class="grid">
+      <div class="tile">
+        <div class="icon"><i class="bi bi-phone"></i></div>
+        <h3 data-i18n-fa>روی موبایل</h3>
+        <h3 data-i18n-en>On phones</h3>
+        <p data-i18n-fa>کیفیت Path را کم یا خاموش بگذارید. منوهای تو در تو به‌صورت پنل تمام‌عرض باز می‌شوند.</p>
+        <p data-i18n-en>Use Path quality Low/Off. Nested menus open as a full-width panel.</p>
+      </div>
+      <div class="tile">
+        <div class="icon"><i class="bi bi-pc-display"></i></div>
+        <h3 data-i18n-fa>روی رایانه</h3>
+        <h3 data-i18n-en>On PC</h3>
+        <p data-i18n-fa>با رفتن موس روی منو، زیرمنوها باز می‌شوند (تبدیل، کیفیت، پیش‌تنظیم نور).</p>
+        <p data-i18n-en>Hover menus to open submenus (Convert, quality, light presets).</p>
+      </div>
+      <div class="tile">
+        <div class="icon"><i class="bi bi-image"></i></div>
+        <h3 data-i18n-fa>عکس بهتر</h3>
+        <h3 data-i18n-en>Better screenshots</h3>
+        <p data-i18n-fa>کیفیت را بالا ببرید، نور را تنظیم کنید، درخشش را روشن کنید، سپس PNG ذخیره کنید.</p>
+        <p data-i18n-en>Raise quality, place the light, enable Shine, then Save PNG.</p>
+      </div>
+    </div>
+
+    <footer>
+      <span><i class="bi bi-box"></i>
+        <span data-i18n-fa>مستندات Renderer</span>
+        <span data-i18n-en>Renderer documentation</span>
+      </span>
+      <span>
+        <a href="https://rendererproject.github.io/" target="_blank" rel="noopener">
+          <span data-i18n-fa>برنامه</span><span data-i18n-en>App</span>
+        </a>
+        ·
+        <a href="https://github.com/Rendererproject" target="_blank" rel="noopener">GitHub</a>
+      </span>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var html = document.documentElement;
+      var btn = document.getElementById('langBtn');
+      function apply(lang) {
+        var fa = lang !== 'en';
+        html.lang = fa ? 'fa' : 'en';
+        html.dir = fa ? 'rtl' : 'ltr';
+        document.title = fa ? 'راهنمای Renderer' : 'Renderer Docs';
+        try { localStorage.setItem('renderer_docs_lang', fa ? 'fa' : 'en'); } catch (e) {}
+      }
+      var saved = null;
+      try { saved = localStorage.getItem('renderer_docs_lang'); } catch (e) {}
+      apply(saved === 'en' ? 'en' : 'fa');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          apply(html.lang === 'fa' ? 'en' : 'fa');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
